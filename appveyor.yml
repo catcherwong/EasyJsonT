@@ -1,0 +1,11 @@
+version: 1.0.{build}
+image:
+- Ubuntu1804
+- Visual Studio 2017
+configuration: Release
+before_build:
+- ps: dotnet restore
+build:
+  project: EasyJsonT
+  parallel: true
+  verbosity: minimal
