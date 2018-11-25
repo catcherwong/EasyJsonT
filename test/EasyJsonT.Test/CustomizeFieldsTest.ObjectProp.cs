@@ -163,7 +163,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            Assert.Throws<NotFoundPropertyException>(() => JsonTProvider.CustomizeFields(json, "obj", fields, false));
+            Assert.Throws<NotFoundNodeException>(() => JsonTProvider.CustomizeFields(json, "obj", fields, false));
         }
     }
 }

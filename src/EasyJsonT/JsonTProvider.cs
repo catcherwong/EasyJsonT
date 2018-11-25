@@ -54,7 +54,7 @@
             var objProp = objProps.FirstOrDefault(x => x.Name.Equals(property, StringComparison.OrdinalIgnoreCase))?.Name;
 
             if (string.IsNullOrWhiteSpace(objProp))
-                throw new NotFoundPropertyException($"The input json don't has such property named {property}");
+                throw new NotFoundNodeException($"The input json don't has such property named {property}");
 
             var targetResult = string.Empty;
             //get the value of the property
@@ -75,6 +75,33 @@
             @object.Add(objProp, JToken.Parse(targetResult));
 
             return @object.ToString();
+        }
+
+        /// <summary>
+        /// Adds nodes for input JSON string.
+        /// </summary>
+        /// <returns>The reconstructed JSON string.</returns>
+        /// <param name="json">The input JSON string.</param>
+        /// <param name="dict">The nodes need to add.</param>
+        public static string AddNodes(string json, Dictionary<string, object> dict)
+        {
+            var jToken = JToken.Parse(json);
+
+            if (jToken.Type != JTokenType.Object)
+                throw new NotSpecialJsonTypeException($"The type of input JSON isn't an object.");
+                
+            var jObj = (JObject)jToken;
+
+            foreach (var item in dict)
+            {
+                //filter the same key.
+                if(!jObj.ContainsKey(item.Key))
+                {
+                    jObj.Add(item.Key, JToken.FromObject(item.Value));
+                }
+            }
+
+            return jObj.ToString();
         }
 
         /// <summary>
