@@ -5,7 +5,7 @@
     using System.Collections.Generic;
     using System;
 
-    public partial class CustomizeFieldsTest
+    public partial class FilterNodesTest
     {
         [Fact]
         public void JObject_With_JObject_Prop_Remove_Test_Should_Succeed()
@@ -23,7 +23,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, "data", fields, true);
+            var actual = JsonTProvider.FilterNodes(json, "data", fields, true);
 
             var expected = new
             {
@@ -54,7 +54,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, "data", fields, false);
+            var actual = JsonTProvider.FilterNodes(json, "data", fields, false);
 
             var expected = new
             {
@@ -86,7 +86,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, "data", fields, true);
+            var actual = JsonTProvider.FilterNodes(json, "data", fields, true);
 
             var expected = new
             {
@@ -118,7 +118,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, "data", fields, false);
+            var actual = JsonTProvider.FilterNodes(json, "data", fields, false);
 
             var expected = new
             {
@@ -144,7 +144,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            Assert.Throws<ArgumentException>(() => JsonTProvider.CustomizeFields(json, "data", fields, false));
+            Assert.Throws<ArgumentException>(() => JsonTProvider.FilterNodes(json, "data", fields, false));
         }
 
         [Fact]
@@ -163,7 +163,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            Assert.Throws<NotFoundNodeException>(() => JsonTProvider.CustomizeFields(json, "obj", fields, false));
+            Assert.Throws<NotFoundNodeException>(() => JsonTProvider.FilterNodes(json, "obj", fields, false));
         }
     }
 }

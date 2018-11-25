@@ -61,9 +61,9 @@
             //Console.WriteLine(res21);
             //var res22 = JsonTProvider.CustomizeFields(json2, new List<string> { "a3", "a1", "sub" }, false);
             //Console.WriteLine(res22);
-            var res23 = JsonTProvider.CustomizeFields(json2, "data", new List<string> { "a3", "sub" });
+            var res23 = JsonTProvider.FilterNodes(json2, "data", new List<string> { "a3", "sub" });
             Console.WriteLine(res23);
-            var res24 = JsonTProvider.CustomizeFields(json2, "data", new List<string> { "a3", "a1", "sub" }, false);
+            var res24 = JsonTProvider.FilterNodes(json2, "data", new List<string> { "a3", "a1", "sub" }, false);
             Console.WriteLine(res24);
 
             Console.ReadKey();

@@ -4,7 +4,7 @@ namespace EasyJsonT.Test
     using EasyJsonT;
     using System.Collections.Generic;
 
-    public class AddNodeTest
+    public class AddNodesTest
     {
         [Fact]
         public void Add_Nodes_Should_Succeed()

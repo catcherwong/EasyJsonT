@@ -4,7 +4,7 @@
     using EasyJsonT;
     using System.Collections.Generic;
 
-    public partial class CustomizeFieldsTest
+    public partial class FilterNodesTest
     {
         [Fact]
         public void JObject_Remove_Test_Should_Succeed()
@@ -19,7 +19,7 @@
 
             var fields = new List<string> { "prop1", "prop3"  };
 
-            var actual = JsonTProvider.CustomizeFields(json, fields, true);
+            var actual = JsonTProvider.FilterNodes(json, fields, true);
 
             var expected = new
             {
@@ -43,7 +43,7 @@
 
             var fields = new List<string> { "prop1", "prop3" };
 
-            var actual = JsonTProvider.CustomizeFields(json, fields, false);
+            var actual = JsonTProvider.FilterNodes(json, fields, false);
 
             var expected = new
             {
@@ -75,7 +75,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, fields, true);
+            var actual = JsonTProvider.FilterNodes(json, fields, true);
 
             var expected = new List<dynamic>
             {
@@ -113,7 +113,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, fields, false);
+            var actual = JsonTProvider.FilterNodes(json, fields, false);
 
             var expected = new List<dynamic>
             {
@@ -144,7 +144,7 @@
 
             var fields = new List<string> { "prop1", "prop3" };
 
-            var actual = JsonTProvider.CustomizeFields(json, fields, true);
+            var actual = JsonTProvider.FilterNodes(json, fields, true);
 
             var expected = new
             {
@@ -175,7 +175,7 @@
 
             var fields = new List<string> { "prop1" };
 
-            var actual = JsonTProvider.CustomizeFields(json, fields, false);
+            var actual = JsonTProvider.FilterNodes(json, fields, false);
 
             var expected = new List<dynamic>
             {

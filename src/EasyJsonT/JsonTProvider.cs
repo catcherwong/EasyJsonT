@@ -8,24 +8,24 @@
     public static class JsonTProvider
     {
         /// <summary>
-        /// Customizes the fields.
+        /// Filters the nodes.
         /// </summary>
-        /// <returns>The fields.</returns>
-        /// <param name="json">Json.</param>
-        /// <param name="fields">Fields.</param>
+        /// <returns>The reconstructed JSON string.</returns>
+        /// <param name="json">The input JSON string.</param>
+        /// <param name="nodes">The nodes need to be filtered.</param>
         /// <param name="isRemove">If set to <c>true</c> is remove.</param>
-        public static string CustomizeFields(string json, IEnumerable<string> fields, bool isRemove = true)
+        public static string FilterNodes(string json, IEnumerable<string> nodes, bool isRemove = true)
         {
             var jToken = JToken.Parse(json);
 
             if (jToken.Type == JTokenType.Object)
             {
-                var obj = CustomizeJOjbect(json, fields, isRemove);
+                var obj = CustomizeJOjbect(jToken, nodes, isRemove);
                 return obj.ToString();
             }
             else if (jToken.Type == JTokenType.Array)
             {
-                var arr = CustomizeJArray(json, fields, isRemove);
+                var arr = CustomizeJArray(jToken, nodes, isRemove);
                 return arr.ToString();
             }
 
@@ -33,14 +33,14 @@
         }
 
         /// <summary>
-        /// Customizes the fields.
+        /// Filters the nodes.
         /// </summary>
-        /// <returns>The fields.</returns>
-        /// <param name="json">Json.</param>
-        /// <param name="property">Property.</param>
-        /// <param name="fields">Fields.</param>
+        /// <returns>The reconstructed JSON string.</returns>
+        /// <param name="json">The input JSON string.</param>
+        /// <param name="root">The name of root node.</param>
+        /// <param name="nodes">The nodes need to be filtered.</param>
         /// <param name="isRemove">If set to <c>true</c> is remove.</param>
-        public static string CustomizeFields(string json, string property, IEnumerable<string> fields, bool isRemove = true)
+        public static string FilterNodes(string json, string root, IEnumerable<string> nodes, bool isRemove = true)
         {
             var jToken = JToken.Parse(json);
 
@@ -51,10 +51,10 @@
 
             var objProps = @object.Properties();
 
-            var objProp = objProps.FirstOrDefault(x => x.Name.Equals(property, StringComparison.OrdinalIgnoreCase))?.Name;
+            var objProp = objProps.FirstOrDefault(x => x.Name.Equals(root, StringComparison.OrdinalIgnoreCase))?.Name;
 
             if (string.IsNullOrWhiteSpace(objProp))
-                throw new NotFoundNodeException($"The input json don't has such property named {property}");
+                throw new NotFoundNodeException($"The input json don't has such node named {root}");
 
             var targetResult = string.Empty;
             //get the value of the property
@@ -62,12 +62,12 @@
 
             if (targetObj.Type == JTokenType.Array)
             {
-                var jArr = CustomizeJArray(targetObj.ToString(), fields, isRemove);
+                var jArr = CustomizeJArray(targetObj, nodes, isRemove);
                 targetResult = jArr.ToString();
             }
             else if (targetObj.Type == JTokenType.Object)
             {
-                var jObj = CustomizeJOjbect(targetObj.ToString(), fields, isRemove);
+                var jObj = CustomizeJOjbect(targetObj, nodes, isRemove);
                 targetResult = jObj.ToString();
             }
 
@@ -105,19 +105,19 @@
         }
 
         /// <summary>
-        /// Customizes the JO jbect.
+        /// Customizes the JOjbect.
         /// </summary>
         /// <returns>The JO jbect.</returns>
-        /// <param name="json">Json.</param>
-        /// <param name="fields">Fields.</param>
+        /// <param name="jToken">jToken.</param>
+        /// <param name="nodes">Nodes.</param>
         /// <param name="isRemove">If set to <c>true</c> is remove.</param>
-        private static JObject CustomizeJOjbect(string json, IEnumerable<string> fields, bool isRemove = true)
+        private static JObject CustomizeJOjbect(JToken jToken, IEnumerable<string> nodes, bool isRemove = true)
         {
-            var @object = JObject.Parse(json);
+            var @object = (JObject)jToken;
 
             var properties = @object.Properties();
 
-            var list = properties.SelectMany(jProp => fields, (jProp, name) =>
+            var list = properties.SelectMany(jProp => nodes, (jProp, name) =>
             {
                 return jProp.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ? jProp.Name : string.Empty;
             }).Where(x => !string.IsNullOrEmpty(x)).ToList();
@@ -137,20 +137,21 @@
         }
 
         /// <summary>
-        /// Customizes the JA rray.
+        /// Customizes the JArray.
         /// </summary>
         /// <returns>The JA rray.</returns>
-        /// <param name="json">Json.</param>
-        /// <param name="fields">Fields.</param>
+        /// <param name="jToken">jToken.</param>
+        /// <param name="nodes">Nodes.</param>
         /// <param name="isRemove">If set to <c>true</c> is remove.</param>
-        private static JArray CustomizeJArray(string json, IEnumerable<string> fields, bool isRemove = true)
+        private static JArray CustomizeJArray(JToken jToken, IEnumerable<string> nodes, bool isRemove = true)
         {
-            var jArray = JArray.Parse(json);
-            var list = new List<JObject>();
+            var jArray = (JArray)jToken;
+
+            var list = new List<JToken>();
 
             foreach (var jObj in jArray)
             {
-                var obj = CustomizeJOjbect(jObj.ToString(), fields, isRemove);
+                var obj = CustomizeJOjbect(jObj, nodes, isRemove);
                 list.Add(obj);
             }
 
