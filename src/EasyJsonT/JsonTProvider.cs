@@ -20,16 +20,14 @@
 
             if (jToken.Type == JTokenType.Object)
             {
-                var obj = CustomizeJOjbect(jToken, nodes, isRemove);
-                return obj.ToString();
+                CustomizeJOjbect(jToken, nodes, isRemove);
             }
             else if (jToken.Type == JTokenType.Array)
             {
-                var arr = CustomizeJArray(jToken, nodes, isRemove);
-                return arr.ToString();
+                CustomizeJArray(jToken, nodes, isRemove);
             }
 
-            return json;
+            return jToken.ToString();
         }
 
         /// <summary>
@@ -51,28 +49,22 @@
 
             var objProps = @object.Properties();
 
-            var objProp = objProps.FirstOrDefault(x => x.Name.Equals(root, StringComparison.OrdinalIgnoreCase))?.Name;
+            var objProp = objProps.GetJSONNodeName(root);
 
             if (string.IsNullOrWhiteSpace(objProp))
                 throw new NotFoundNodeException($"The input json don't has such node named {root}");
-
-            var targetResult = string.Empty;
+                
             //get the value of the property
             var targetObj = @object.Property(objProp).Value;
 
             if (targetObj.Type == JTokenType.Array)
             {
-                var jArr = CustomizeJArray(targetObj, nodes, isRemove);
-                targetResult = jArr.ToString();
+                CustomizeJArray(targetObj, nodes, isRemove);
             }
             else if (targetObj.Type == JTokenType.Object)
             {
-                var jObj = CustomizeJOjbect(targetObj, nodes, isRemove);
-                targetResult = jObj.ToString();
+                CustomizeJOjbect(targetObj, nodes, isRemove);
             }
-
-            @object.Remove(objProp);
-            @object.Add(objProp, JToken.Parse(targetResult));
 
             return @object.ToString();
         }
@@ -117,10 +109,7 @@
 
             var properties = @object.Properties();
 
-            var list = properties.SelectMany(jProp => nodes, (jProp, name) =>
-            {
-                return jProp.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ? jProp.Name : string.Empty;
-            }).Where(x => !string.IsNullOrEmpty(x)).ToList();
+            var list = properties.GetJSONNodesName(nodes);
 
             if (!isRemove)
             {
@@ -147,20 +136,13 @@
         {
             var jArray = (JArray)jToken;
 
-            var list = new List<JToken>();
-
-            foreach (var jObj in jArray)
+            foreach (var jT in jArray)
             {
-                var obj = CustomizeJOjbect(jObj, nodes, isRemove);
-                list.Add(obj);
+                if (jT.Type != JTokenType.Object) break;
+
+                CustomizeJOjbect(jT, nodes, isRemove);
             }
 
-            jArray.Clear();
-
-            foreach (var item in list)
-            {
-                jArray.Add(item);
-            }
             return jArray;
         }
     }
