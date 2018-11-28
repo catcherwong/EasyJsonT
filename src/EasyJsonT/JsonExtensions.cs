@@ -46,5 +46,27 @@
             }
         }
 
+        /// <summary>
+        /// Gets the JSON Nodes name map.
+        /// </summary>
+        /// <returns>The JSONN odes name map.</returns>
+        /// <param name="properties">Properties.</param>
+        /// <param name="nameList">Name list.</param>
+        /// <param name="comparison">Comparison.</param>
+        public static List<(string o,string n)> GetJSONNodesNameMap(this IEnumerable<JProperty> properties, IEnumerable<string> nameList, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            if (properties != null && properties.Any())
+            {
+                return properties.SelectMany(jProp => nameList, (jProp, name) =>
+                {
+                    return jProp.Name.Equals(name, StringComparison.OrdinalIgnoreCase) ? (jProp.Name,name) : (string.Empty,name);
+                }).Where(x => !string.IsNullOrEmpty(x.Item1)).ToList();
+            }
+            else
+            {
+                return new List<(string, string)>();
+            }
+        }
+
     }
 }

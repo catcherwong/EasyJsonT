@@ -5,6 +5,9 @@
     using System.Linq;
     using Newtonsoft.Json.Linq;
 
+    /// <summary>
+    /// JsonT Provider.
+    /// </summary>
     public static class JsonTProvider
     {
         /// <summary>
@@ -94,6 +97,58 @@
             }
 
             return jObj.ToString();
+        }
+
+        /// <summary>
+        /// Renames the nodes.
+        /// </summary>
+        /// <returns>The nodes.</returns>
+        /// <param name="json">Json.</param>
+        /// <param name="nameMap">Name map.</param>
+        public static string RenameNodes(string json, Dictionary<string, string> nameMap)
+        {
+            var jToken = JToken.Parse(json);
+
+            if (jToken.Type == JTokenType.Object)
+            {
+                return AddAndRemoveNode (jToken, nameMap).ToString();
+            }
+            else if (jToken.Type == JTokenType.Array)
+            {
+                var jArray = (JArray)jToken;
+
+                foreach (var item in jArray)
+                {
+                    if (item.Type != JTokenType.Object) break;
+
+                    AddAndRemoveNode(item, nameMap);
+                }
+
+                return jArray.ToString();
+            }
+
+            return json;
+        }
+
+        /// <summary>
+        /// Adds the and remove node.
+        /// </summary>
+        /// <returns>The and remove node.</returns>
+        /// <param name="jToken">J token.</param>
+        /// <param name="nameMap">Name map.</param>
+        private static JObject AddAndRemoveNode(JToken jToken, Dictionary<string, string> nameMap)
+        {
+            var jObj = (JObject)jToken;
+            var props = jObj.Properties();
+            var list = props.GetJSONNodesNameMap(nameMap.Keys);
+
+            foreach (var (o, n) in list)
+            {
+                var val = jObj.Property(o).Value;
+                jObj.Add(nameMap[n], val);
+                jObj.Remove(o);
+            }
+            return jObj;
         }
 
         /// <summary>
