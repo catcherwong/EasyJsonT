@@ -56,7 +56,7 @@
 
             if (string.IsNullOrWhiteSpace(objProp))
                 throw new NotFoundNodeException($"The input json don't has such node named {root}");
-                
+
             //get the value of the property
             var targetObj = @object.Property(objProp).Value;
 
@@ -84,13 +84,13 @@
 
             if (jToken.Type != JTokenType.Object)
                 throw new NotSpecialJsonTypeException($"The type of input JSON isn't an object.");
-                
+
             var jObj = (JObject)jToken;
 
             foreach (var item in dict)
             {
                 //filter the same key.
-                if(!jObj.ContainsKey(item.Key))
+                if (!jObj.ContainsKey(item.Key))
                 {
                     jObj.Add(item.Key, JToken.FromObject(item.Value));
                 }
@@ -111,7 +111,7 @@
 
             if (jToken.Type == JTokenType.Object)
             {
-                return AddAndRemoveNode (jToken, nameMap).ToString();
+                return AddAndRemoveNode(jToken, nameMap).ToString();
             }
             else if (jToken.Type == JTokenType.Array)
             {
@@ -131,6 +131,121 @@
         }
 
         /// <summary>
+        /// Translates the values.
+        /// </summary>
+        /// <returns>The values.</returns>
+        /// <param name="json">Json.</param>
+        /// <param name="nodeValMap">Node value map.</param>
+        public static string TranslateValues(string json, Dictionary<string, Dictionary<object, object>> nodeValMap)
+        {
+            var jToken = JToken.Parse(json);
+
+            if (jToken.Type == JTokenType.Object)
+            {
+                var @object = Translate(jToken, nodeValMap);
+                return @object.ToString();
+            }
+            else if (jToken.Type == JTokenType.Array)
+            {
+                var jArray = (JArray)jToken;
+
+                foreach (var item in jArray)
+                {
+                    if (item.Type != JTokenType.Object) break;
+
+                    Translate(item, nodeValMap);
+                }
+
+                return jArray.ToString();
+            }
+
+            return json;
+        }
+
+        /// <summary>
+        /// Translates the values with special root.
+        /// </summary>
+        /// <returns>The values.</returns>
+        /// <param name="json">Json.</param>
+        /// <param name="root">Root.</param>
+        /// <param name="nodeValMap">Node value map.</param>
+        public static string TranslateValues(string json, string root, Dictionary<string, Dictionary<object, object>> nodeValMap)
+        {
+            var jToken = JToken.Parse(json);
+
+            if (jToken.Type != JTokenType.Object)
+                throw new NotSpecialJsonTypeException($"The input json must be JObject");
+
+            var @object = (JObject)jToken;
+
+            var objProps = @object.Properties();
+
+            var objProp = objProps.GetJSONNodeName(root);
+
+            if (string.IsNullOrWhiteSpace(objProp))
+                throw new NotFoundNodeException($"The input json don't has such node named {root}");
+
+            //get the value of the property
+            var targetObj = @object.Property(objProp).Value;
+
+            if (targetObj.Type == JTokenType.Array)
+            {
+                var jArray = (JArray)targetObj;
+
+                foreach (var item in jArray)
+                {
+                    if (item.Type != JTokenType.Object) break;
+
+                    Translate(item, nodeValMap);
+                }
+            }
+            else if (targetObj.Type == JTokenType.Object)
+            {
+                Translate(targetObj, nodeValMap).ToString();
+            }
+
+            return @object.ToString();
+        }
+
+        #region Private Methods
+        /// <summary>
+        /// Translate the specified jToken and nodeValMap.
+        /// </summary>
+        /// <returns>The translate.</returns>
+        /// <param name="jToken">J token.</param>
+        /// <param name="nodeValMap">Node value map.</param>
+        private static JObject Translate(JToken jToken, Dictionary<string, Dictionary<object, object>> nodeValMap)
+        {
+            var @object = (JObject)jToken;
+            var props = @object.Properties();
+
+            foreach (var item in nodeValMap)
+            {
+                var nodeName = props.GetJSONNodeName(item.Key);
+
+                if (!string.IsNullOrWhiteSpace(nodeName))
+                {
+                    var nodeValue = @object.Property(nodeName).Value;
+
+                    if (nodeValue.Type != JTokenType.Object && nodeValue.Type != JTokenType.Array)
+                    {
+                        var valMap = item.Value;
+
+                        foreach (var val in valMap)
+                        {
+                            if (nodeValue.Equals(JToken.FromObject(val.Key)))
+                            {
+                                @object.Property(nodeName).Value = JToken.FromObject(val.Value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return @object;
+        }
+
+        /// <summary>
         /// Adds the and remove node.
         /// </summary>
         /// <returns>The and remove node.</returns>
@@ -145,8 +260,12 @@
             foreach (var (o, n) in list)
             {
                 var val = jObj.Property(o).Value;
-                jObj.Add(nameMap[n], val);
-                jObj.Remove(o);
+
+                if (!jObj.ContainsKey(nameMap[n]))
+                {
+                    jObj.Add(nameMap[n], val);
+                    jObj.Remove(o);
+                }
             }
             return jObj;
         }
@@ -177,7 +296,6 @@
             }
 
             return @object;
-
         }
 
         /// <summary>
@@ -200,5 +318,6 @@
 
             return jArray;
         }
+        #endregion
     }
 }
