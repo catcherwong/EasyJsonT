@@ -50,16 +50,9 @@
 
             var @object = (JObject)jToken;
 
-            var objProps = @object.Properties();
-
-            var objProp = objProps.GetJSONNodeName(root);
-
-            if (string.IsNullOrWhiteSpace(objProp))
+            if(!@object.TryGetValue(root,StringComparison.OrdinalIgnoreCase,out var targetObj))
                 throw new NotFoundNodeException($"The input json don't has such node named {root}");
-
-            //get the value of the property
-            var targetObj = @object.Property(objProp).Value;
-
+                           
             if (targetObj.Type == JTokenType.Array)
             {
                 CustomizeJArray(targetObj, nodes, isRemove);
@@ -88,7 +81,7 @@
             var jObj = (JObject)jToken;
 
             foreach (var item in dict)
-            {
+            {            
                 //filter the same key.
                 if (!jObj.ContainsKey(item.Key))
                 {
@@ -142,8 +135,7 @@
 
             if (jToken.Type == JTokenType.Object)
             {
-                var @object = Translate(jToken, nodeValMap);
-                return @object.ToString();
+                return Translate(jToken, nodeValMap).ToString();
             }
             else if (jToken.Type == JTokenType.Array)
             {
@@ -178,15 +170,8 @@
 
             var @object = (JObject)jToken;
 
-            var objProps = @object.Properties();
-
-            var objProp = objProps.GetJSONNodeName(root);
-
-            if (string.IsNullOrWhiteSpace(objProp))
+            if(!@object.TryGetValue(root,StringComparison.OrdinalIgnoreCase,out var targetObj))            
                 throw new NotFoundNodeException($"The input json don't has such node named {root}");
-
-            //get the value of the property
-            var targetObj = @object.Property(objProp).Value;
 
             if (targetObj.Type == JTokenType.Array)
             {
@@ -207,7 +192,7 @@
             return @object.ToString();
         }
 
-        #region Private Methods
+        #region Private Methods          
         /// <summary>
         /// Translate the specified jToken and nodeValMap.
         /// </summary>
@@ -253,21 +238,21 @@
         /// <param name="nameMap">Name map.</param>
         private static JObject AddAndRemoveNode(JToken jToken, Dictionary<string, string> nameMap)
         {
-            var jObj = (JObject)jToken;
-            var props = jObj.Properties();
+            var @object = (JObject)jToken;
+            var props = @object.Properties();
             var list = props.GetJSONNodesNameMap(nameMap.Keys);
 
             foreach (var (o, n) in list)
             {
-                var val = jObj.Property(o).Value;
+                var val = @object.Property(o).Value;
 
-                if (!jObj.ContainsKey(nameMap[n]))
+                if (!@object.ContainsKey(nameMap[n]))
                 {
-                    jObj.Add(nameMap[n], val);
-                    jObj.Remove(o);
+                    @object.Add(nameMap[n], val);
+                    @object.Remove(o);
                 }
             }
-            return jObj;
+            return @object;
         }
 
         /// <summary>
