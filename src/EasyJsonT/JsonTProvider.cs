@@ -71,25 +71,32 @@
         /// <returns>The reconstructed JSON string.</returns>
         /// <param name="json">The input JSON string.</param>
         /// <param name="dict">The nodes need to add.</param>
-        public static string AddNodes(string json, Dictionary<string, object> dict)
+        /// <param name="nodeName">The node name of origin JSON.</param>
+        public static string AddNodes(string json, Dictionary<string, object> dict, string nodeName = "")
         {
             var jToken = JToken.Parse(json);
 
-            if (jToken.Type != JTokenType.Object)
-                throw new NotSpecialJsonTypeException($"The type of input JSON isn't an object.");
+            var isOriginPrpo = !string.IsNullOrWhiteSpace(nodeName);
 
-            var jObj = (JObject)jToken;
+            if (!isOriginPrpo && jToken.Type != JTokenType.Object)
+                throw new NotSpecialJsonTypeException($"The type of input JSON isn't an object.");
+                
+            var @object = new JObject();
+
+            if (!isOriginPrpo) @object.Merge(jToken);
+
+            if (isOriginPrpo && !@object.ContainsKey(nodeName)) @object.Add(nodeName, jToken);
 
             foreach (var item in dict)
-            {            
+            {
                 //filter the same key.
-                if (!jObj.ContainsKey(item.Key))
+                if (!@object.ContainsKey(item.Key))
                 {
-                    jObj.Add(item.Key, JToken.FromObject(item.Value));
+                    @object.Add(item.Key, JToken.FromObject(item.Value));
                 }
             }
 
-            return jObj.ToString();
+            return @object.ToString();
         }
 
         /// <summary>

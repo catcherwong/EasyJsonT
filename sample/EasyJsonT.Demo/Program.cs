@@ -45,8 +45,10 @@
             };
 
             var addNodesJson = @"{'userName':'catcherwong'}";
-            var addNodesResult = JsonTProvider.AddNodes(addNodesJson, addNodesDict);
+            var addNodesResult1 = JsonTProvider.AddNodes(addNodesJson, addNodesDict);
             //{"userName":"catcherwong","age":18,"subObj":{"prop1":"123"},"subArray":["a","b"]}
+            var addNodesResult2 = JsonTProvider.AddNodes(addNodesJson, addNodesDict,"basic");
+            //{"basic":{"userName":"catcherwong"},"age":18,"subObj":{"prop1":"123"},"subArray":["a","b"]}
 
             //3. rename nodes
             var renameDict = new Dictionary<string, string>

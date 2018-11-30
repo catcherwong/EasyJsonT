@@ -75,5 +75,67 @@ namespace EasyJsonT.Test
 
             Assert.Throws<NotSpecialJsonTypeException>(() => JsonTProvider.AddNodes(json, addNodes));
         }
+
+        [Fact]
+        public void Add_Nodes_With_Node_Name_Should_Succeed_When_JSON_Is_Object()
+        {
+            var json = new
+            {
+                prop1 = 1
+            }.ToJson();
+
+            var addNodes = new Dictionary<string, object>
+            {
+                {"prop2",2},
+                {"prop3",new{ sub = 1}},
+                {"prop4",new List<string>{"a"}}
+            };
+
+            var res = JsonTProvider.AddNodes(json, addNodes,"nodeName");
+
+            var expected = new
+            {
+                nodeName = new
+                {
+                    prop1 = 1
+                },
+                prop2 = 2,
+                prop3 = new { sub = 1 },
+                prop4 = new List<string> { "a" }
+            }.ToJson();
+
+            Assert.Equal(expected, res);
+        }
+
+        [Fact]
+        public void Add_Nodes_With_Node_Name_Should_Succeed_When_JSON_Is_Array()
+        {
+            var json = new List<string>
+            {
+                "a","b","c"
+            }.ToJson();
+
+            var addNodes = new Dictionary<string, object>
+            {
+                {"prop2",2},
+                {"prop3",new{ sub = 1}},
+                {"prop4",new List<string>{"a"}}
+            };
+
+            var res = JsonTProvider.AddNodes(json, addNodes, "nodeName");
+
+            var expected = new
+            {
+                nodeName = new List<string>
+                {
+                    "a","b","c"
+                },
+                prop2 = 2,
+                prop3 = new { sub = 1 },
+                prop4 = new List<string> { "a" }
+            }.ToJson();
+
+            Assert.Equal(expected, res);
+        }
     }
 }
