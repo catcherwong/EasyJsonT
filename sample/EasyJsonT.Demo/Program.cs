@@ -2,85 +2,86 @@
 {
     using EasyJsonT;
     using System;
-    using Newtonsoft.Json;
     using System.Collections.Generic;
 
     class Program
     {
         static void Main(string[] args)
         {
-            ////1. JObject
-            //var c = new MyClass
-            //{
-            //    A1 = 1,
-            //    A2 = "2",
-            //    A3 = 3,
-            //    Sub = new MySubClass 
-            //    {
-            //        B1 = 11,
-            //        B2 = "12"
-            //    }
-            //};
+            //1. filter nodes
 
-            //var json = JsonConvert.SerializeObject(c);
+            var filterNode = new List<string> { "UserName", "age" };
 
-            //var res1 = JsonTProvider.CustomizeFields(json, new List<string> { "a3" , "sub" });
-            //Console.WriteLine(res1);
-            //var res2 = JsonTProvider.CustomizeFields(json, new List<string> { "a3","a1","sub" },false);
-            //Console.WriteLine(res2);
-            //var res3 = JsonTProvider.CustomizeFields(json, "sub" ,new List<string> { "b1" });
-            //Console.WriteLine(res3);
-            //var res4 = JsonTProvider.CustomizeFields(json, "sub", new List<string> { "b1" },false);
-            //Console.WriteLine(res4);
+            var filterJson1 = @"{'userName':'catcherwong','age':18,'hobbies':['write','running']}";
+            var filterJsonResult11 = JsonTProvider.FilterNodes(filterJson1, filterNode, true);
+            //{"hobbies": ["write, "running"]}
+            var filterJsonResult12 = JsonTProvider.FilterNodes(filterJson1, filterNode, false);
+            //{"userName": "catcherwong", "age": 18}
 
-            //2. JArray
+            var filterJson2 = @"[{'userName':'catcherwong','age':18,'hobbies':['write','running']},{'userName':'james','age':20,'hobbies':['music']}]";
+            var filterJsonResult21 = JsonTProvider.FilterNodes(filterJson2, filterNode, true);
+            //[{"hobbies":["write","running"]},{"hobbies":["music"]}]
+            var filterJsonResult22 = JsonTProvider.FilterNodes(filterJson2, filterNode, false);
+            //[{"userName":"catcherwong","age":18},{"userName":"james","age":20}]
 
-            var l = new
+            var filterJson3 = @"{'code':0,'msg':'ok','data':{'userName':'catcherwong','age':18,'hobbies':['write','running']}}";
+            var filterJsonResult31 = JsonTProvider.FilterNodes(filterJson3, "data" ,filterNode, true);
+            //{"code":0,"msg":"ok","data":{"hobbies":["write","running"]}}
+            var filterJsonResult32 = JsonTProvider.FilterNodes(filterJson3, "data" , filterNode, false);
+            //{"code":0,"msg":"ok","data":{"userName":"catcherwong","age":18}}
+
+            var filterJson4 = @"{'code':0,'msg':'ok','data':[{'userName':'catcherwong','age':18,'hobbies':['write','running']},{'userName':'james','age':20,'hobbies':['music']}]}";
+            var filterJsonResult41 = JsonTProvider.FilterNodes(filterJson4, "data", filterNode, true);
+            //{"code":0,"msg":"ok","data":[{"hobbies":["write","running"]},{"hobbies":["music"]}]}
+            var filterJsonResult42 = JsonTProvider.FilterNodes(filterJson4, "data", filterNode, false);
+            //{"code":0,"msg":"ok","data":[{"userName":"catcherwong","age":18},{"userName":"james","age":20}]}
+
+            //2. add nodes
+            var addNodesDict = new Dictionary<string, object>
             {
-                code = 0,
-                msg = "",
-                data = new List<MyClass>
-                {
-                    new MyClass
-                    {
-                        A1 = 1,
-                        A2 = "2",
-                        A3 = 3,
-                        Sub = new MySubClass
-                        {
-                            B1 = 11,
-                            B2 = "12"
-                        }
-                    }
-                }
+                {"age",18},
+                {"subObj",new{prop1="123"}},
+                {"subArray",new List<string> {"a","b"}}
             };
 
-            var json2 = JsonConvert.SerializeObject(l);
+            var addNodesJson = @"{'userName':'catcherwong'}";
+            var addNodesResult = JsonTProvider.AddNodes(addNodesJson, addNodesDict);
+            //{"userName":"catcherwong","age":18,"subObj":{"prop1":"123"},"subArray":["a","b"]}
 
-            //var res21 = JsonTProvider.CustomizeFields(json2, new List<string> { "a3", "sub" });
-            //Console.WriteLine(res21);
-            //var res22 = JsonTProvider.CustomizeFields(json2, new List<string> { "a3", "a1", "sub" }, false);
-            //Console.WriteLine(res22);
-            var res23 = JsonTProvider.FilterNodes(json2, "data", new List<string> { "a3", "sub" });
-            Console.WriteLine(res23);
-            var res24 = JsonTProvider.FilterNodes(json2, "data", new List<string> { "a3", "a1", "sub" }, false);
-            Console.WriteLine(res24);
+            //3. rename nodes
+            var renameDict = new Dictionary<string, string>
+            {
+                {"name","userName"},{"nl","age"}
+            };
+
+            var renameJson1 = @"{'name':'catcherwong','nl':18}";
+            var renameJsonResult1 = JsonTProvider.RenameNodes(renameJson1, renameDict);
+            //{"userName":"catcherwong","age":18}          
+
+            //4. translate values
+            var translateValueDict = new Dictionary<string, Dictionary<object, object>>
+            {
+                {"Code",new Dictionary<object, object>{{-1,0},{-2,1}}},
+                {"messAge",new Dictionary<object, object>{{"yes","Success"},{"no","Error"}}}
+            };
+
+            var translateJson1 = @"{'code':-1,'message':'yes'}";
+            var translateResult1 = JsonTProvider.TranslateValues(translateJson1, translateValueDict);
+            //{"code":0,"message":"Success"}
+
+            var translateJson2 = @"[{'code':-1,'message':'yes'},{'code':-2,'message':'no'}]";
+            var translateResult2 = JsonTProvider.TranslateValues(translateJson2, translateValueDict);
+            //[{"code":0,"message":"Success"},{"code":1,"message":"Error"}]
+
+            var translateJson3 = @"{'myCode':-1,'myMessage':'yes','data':{'code':-2,'message':'no'}}";
+            var translateResult3 = JsonTProvider.TranslateValues(translateJson3, "data",translateValueDict);
+            //{"myCode":-1,"myMessage":"yes","data":{"code":1,"message":"Error"}}
+
+            var translateJson4 = @"{'myCode':-1,'myMessage':'yes','data':[{'code':-1,'message':'yes'},{'code':-2,'message':'no'}]}";
+            var translateResult4 = JsonTProvider.TranslateValues(translateJson4, "data", translateValueDict);
+            //{"myCode":-1,"myMessage":"yes","data":[{"code":0,"message":"Success"},{"code":1,"message":"Error"}]}
 
             Console.ReadKey();
         }
-    }
-
-    class MyClass
-    {
-        public int A1 { get; set; }
-        public string A2 { get; set; }
-        public int A3 { get; set; }
-        public MySubClass Sub { get; set; }
-    }
-
-    class MySubClass
-    {
-        public int B1 { get; set; }
-        public string B2 { get; set; }
     }
 }
