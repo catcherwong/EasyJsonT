@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <Owners>Catcher Wong</Owners>
     <Authors>Catcher Wong</Authors>    
+    <Version>1.0.0</Version>
     <Description>          
       EasyJsonT is a library that help us to customize an existing json string.
     </Description>
@@ -12,6 +13,9 @@
     <PackageLicenseUrl>https://github.com/catcherwong/EasyJsonT/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/catcherwong/EasyJsonT</RepositoryUrl>
     <ProjectUrl>https://github.com/catcherwong/EasyJsonT</ProjectUrl>
+    <PackageReleaseNotes>      
+      v1.0.0 Init.
+    </PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>
