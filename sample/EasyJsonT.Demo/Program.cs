@@ -60,6 +60,11 @@
             var renameJsonResult1 = JsonTProvider.RenameNodes(renameJson1, renameDict);
             //{"userName":"catcherwong","age":18}          
 
+            var renameJson2 = @"{'code':0,'msg':'ok','data':{'name':'catcherwong','nl':18}}";
+            var renameJsonResult2 = JsonTProvider.RenameNodes(renameJson2, "data" , renameDict);
+            //{"code":0,"msg":"ok","data":{"userName":"catcherwong","age":18}}          
+
+
             //4. translate values
             var translateValueDict = new Dictionary<string, Dictionary<object, object>>
             {

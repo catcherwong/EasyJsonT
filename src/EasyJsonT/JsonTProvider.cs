@@ -131,6 +131,44 @@
         }
 
         /// <summary>
+        /// Renames the nodes.
+        /// </summary>
+        /// <returns>The nodes.</returns>
+        /// <param name="json">Json.</param>
+        /// <param name="root">Root.</param>
+        /// <param name="nameMap">Name map.</param>
+        public static string RenameNodes(string json, string root ,Dictionary<string, string> nameMap)
+        {
+            var jToken = JToken.Parse(json);
+
+            if (jToken.Type != JTokenType.Object)
+                throw new NotSpecialJsonTypeException($"The type of input JSON isn't an object.");
+
+            var @object = (JObject)jToken;
+
+            if (!@object.TryGetValue(root, StringComparison.OrdinalIgnoreCase, out var targetObj))
+                throw new NotFoundNodeException($"The input json don't has such node named {root}");
+
+            if (targetObj.Type == JTokenType.Array)
+            {
+                var jArray = (JArray)targetObj;
+
+                foreach (var item in jArray)
+                {
+                    if (item.Type != JTokenType.Object) break;
+
+                    AddAndRemoveNode(item, nameMap);
+                }
+            }
+            else if (targetObj.Type == JTokenType.Object)
+            {
+                AddAndRemoveNode(targetObj, nameMap).ToString();
+            }
+
+            return @object.ToString();
+        }
+
+        /// <summary>
         /// Translates the values.
         /// </summary>
         /// <returns>The values.</returns>
